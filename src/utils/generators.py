@@ -2,6 +2,8 @@ import pandas as pd
 import random
 import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
+import os 
 
 def random_date(start, end):
     delta = end - start
@@ -13,7 +15,7 @@ end_date = datetime(2026, 6, 17)
 
 # --- V1 FUNCTIONS (Standard Data with mixed-in errors) ---
 
-def generate_card_v1(num_records=50, filename='card_transactions_v1.csv'):
+def generate_card_v1(num_records=50, filename='card_v1.csv'):
     data = []
     for i in range(num_records):
         rec = {
@@ -31,7 +33,7 @@ def generate_card_v1(num_records=50, filename='card_transactions_v1.csv'):
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
 
-def generate_transfer_v1(num_records=50, filename='bank_transfers_v1.csv'):
+def generate_transfer_v1(num_records=50, filename='transfer_v1.csv'):
     data = []
     for i in range(num_records):
         rec = {
@@ -52,7 +54,7 @@ def generate_transfer_v1(num_records=50, filename='bank_transfers_v1.csv'):
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
 
-def generate_bill_v1(num_records=50, filename='bill_payments_v1.csv'):
+def generate_bill_v1(num_records=50, filename='bill_v1.csv'):
     data = []
     billers = [('City Water', 'WTR_001'), ('National Electric', 'ELE_044')]
     for i in range(num_records):
@@ -75,7 +77,7 @@ def generate_bill_v1(num_records=50, filename='bill_payments_v1.csv'):
 
 # --- V2 FUNCTIONS (Schema Evolution) ---
 
-def generate_card_v2(num_records=50, filename='card_transactions_v2.csv'):
+def generate_card_v2(num_records=50, filename='card_v2.csv'):
     data = []
     for _ in range(num_records):
         dt = random_date(start_date, end_date)
@@ -91,7 +93,7 @@ def generate_card_v2(num_records=50, filename='card_transactions_v2.csv'):
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
 
-def generate_transfer_v2(num_records=50, filename='bank_transfers_v2.csv'):
+def generate_transfer_v2(num_records=50, filename='transfer_v2.csv'):
     data = []
     for _ in range(num_records):
         dt = random_date(start_date, end_date)
@@ -108,7 +110,7 @@ def generate_transfer_v2(num_records=50, filename='bank_transfers_v2.csv'):
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
 
-def generate_bill_v2(num_records=50, filename='bill_payments_v2.csv'):
+def generate_bill_v2(num_records=50, filename='bill_v2.csv'):
     data = []
     billers = [('City Water', 'WTR_001'), ('National Electric', 'ELE_044')]
     for _ in range(num_records):
@@ -127,10 +129,11 @@ def generate_bill_v2(num_records=50, filename='bill_payments_v2.csv'):
 
 
 if __name__ == "__main__":
+    base_path = Path(__file__).parent.parent.parent / "data/raw"
     # Execute generation
-    generate_card_v1()
-    generate_transfer_v1()
-    generate_bill_v1()
-    generate_card_v2()
-    generate_transfer_v2()
-    generate_bill_v2()
+    generate_card_v1(filename=f'{base_path}/card_v1.csv')
+    generate_transfer_v1(filename=f'{base_path}/transfer_v1.csv')
+    generate_bill_v1(filename= f'{base_path}/bill_v1.csv')
+    generate_card_v2(filename= f'{base_path}/card_v2.csv')
+    generate_transfer_v2(filename= f'{base_path}/transfer_v2.csv')
+    generate_bill_v2(filename= f'{base_path}/bill_v2.csv')
