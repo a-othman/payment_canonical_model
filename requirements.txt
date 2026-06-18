@@ -1,4 +1,6 @@
 annotated-types==0.7.0
+matplotlib>=3.7.0
+notebook>=7.0.0
 cramjam==2.11.0
 duckdb==1.5.4
 fastparquet==2026.5.0
