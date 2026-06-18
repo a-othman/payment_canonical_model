@@ -1,30 +1,41 @@
 from datetime import datetime
+from schema.source_models import CardSourceV1, CardSourceV2
 
-def map_card_v1(row: dict) -> dict:
+STATUS_MAP = {
+    "succeeded": "COMPLETED",
+    "failed": "FAILED",
+    "pending": "PENDING",
+    "success": "COMPLETED",
+}
+
+
+def map_card_v1(raw_row: dict) -> dict:
+    src = CardSourceV1(**raw_row)
     return {
-        "payment_id": row["txn_ref"],
-        "amount_cents": int(float(row["txn_amount"]) * 100) if row.get("txn_amount") else None,
-        "currency": row.get("currency", "USD"),
-        "status": str(row.get("status")).upper(),
+        "payment_id": src.txn_ref,
+        "amount_cents": int(src.txn_amount * 100),
+        "currency": src.currency,
+        "status": STATUS_MAP[src.status],
         "payment_method": "CARD",
-        "transaction_timestamp": row["datetime"], # Already ISO 8601
+        "transaction_timestamp": src.datetime,
         "source_metadata": {
-            "network": row.get("card_network"),
-            "version": "v1"
-        }
+            "network": src.card_network,
+            "version": "v1",
+        },
     }
 
 
-def map_card_v2(row: dict) -> dict:
+def map_card_v2(raw_row: dict) -> dict:
+    src = CardSourceV2(**raw_row)
     return {
-        "payment_id": row["charge_id"],
-        "amount_cents": int(row["amount_cents"]), # Already in cents
-        "currency": row.get("currency", "USD"),
-        "status": str(row.get("state")).upper(),
+        "payment_id": src.charge_id,
+        "amount_cents": src.amount_cents,
+        "currency": src.currency,
+        "status": STATUS_MAP[src.state.lower()],
         "payment_method": "CARD",
-        "transaction_timestamp": datetime.fromtimestamp(int(row["created_at_ts"])).isoformat() + "Z",
+        "transaction_timestamp": datetime.fromtimestamp(src.created_at_ts).isoformat() + "Z",
         "source_metadata": {
-            "network": row.get("network"),
-            "version": "v2"
-        }
+            "network": src.network,
+            "version": "v2",
+        },
     }

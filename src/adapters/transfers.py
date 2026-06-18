@@ -1,37 +1,38 @@
 from datetime import datetime
+from schema.source_models import TransferSourceV1, TransferSourceV2
 
 
-def map_transfer_v1(row: dict) -> dict:
-    # Convert MM/DD/YYYY to ISO 8601
-    dt_str = row.get("cleared_date")
-    iso_date = datetime.strptime(dt_str, "%m/%d/%Y").isoformat() + "Z" if dt_str else None
-
+def map_transfer_v1(raw_row: dict) -> dict:
+    src = TransferSourceV1(**raw_row)
+    iso_date = datetime.strptime(src.cleared_date, "%m/%d/%Y %H:%M:%S").isoformat() + "Z"
     return {
-        "payment_id": row.get("transfer_id"),
-        "amount_cents": int(float(row["value"]) * 100) if row.get("value") else None,
-        "currency": "USD", # Implicit in source
-        "status": str(row.get("state")).upper(),
+        "payment_id": src.transfer_id,
+        "amount_cents": int(src.value * 100),
+        "currency": "USD",
+        "status": src.state,
         "payment_method": "TRANSFER",
         "transaction_timestamp": iso_date,
         "source_metadata": {
-            "type": row.get("type"),
-            "sender_routing": row.get("sender_routing"),
-            "sender_acct": row.get("sender_acct"),
-            "version": "v1"
-        }
+            "type": src.transfer_type,
+            "sender_routing": src.sender_routing,
+            "sender_acct": src.sender_acct,
+            "version": "v1",
+        },
     }
 
-def map_transfer_v2(row: dict) -> dict:
+
+def map_transfer_v2(raw_row: dict) -> dict:
+    src = TransferSourceV2(**raw_row)
     return {
-        "payment_id": row.get("trx_ref"),
-        "amount_cents": int(row["amount_cents"]),
-        "currency": "USD", 
-        "status": str(row.get("status")).upper(),
+        "payment_id": src.trx_ref,
+        "amount_cents": src.amount_cents,
+        "currency": "USD",
+        "status": src.status,
         "payment_method": "TRANSFER",
-        "transaction_timestamp": row["cleared_at"], # Now ISO 8601 in source
+        "transaction_timestamp": src.cleared_at,
         "source_metadata": {
-            "payment_method": row.get("payment_method"),
-            "sender_iban": row.get("sender_iban"),
-            "version": "v2"
-        }
+            "type": src.payment_method,
+            "sender_iban": src.sender_iban,
+            "version": "v2",
+        },
     }

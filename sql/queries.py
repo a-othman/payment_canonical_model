@@ -1,27 +1,21 @@
 import duckdb
-
-
-data_path= "/Users/ahmedothman/Desktop/mal/data/output/canonical_payments.parquet"
-data_w_errors_path = "/Users/ahmedothman/Desktop/mal/data/output/dead_letter_queue.json"
+from pathlib import Path
+base_path = Path(__file__).parent.parent
+data_path= base_path / "data/output/canonical_payments.parquet"
+data_w_errors_path = base_path / "data/output/dead_letter_queue.json"
 
 def run_analytics():
     print("📊 Running Downstream Analytics on Unified Payment Model\n")
     print("="*60)
-
-    # ---------------------------------------------------------
-    # Query 1: The Core Financial Aggregation
-    # Proves the canonical schema normalizes disparate data types.
-    # ---------------------------------------------------------
-    print("QUERY 0: sample data ")
+    print("QUERY 0: Total Settled Revenue by Payment Method")
     query_0 = f"""
         SELECT 
-            *
+            count(*) as total_transactions,
         FROM '{data_path}'
     """
     print(duckdb.sql(query_0).show())
 
 
-    
     print("QUERY 1: Total Settled Revenue by Payment Method")
     query_1 = f"""
         SELECT 
@@ -55,12 +49,9 @@ def run_analytics():
     """
     print(duckdb.sql(query_2).show())
 
-
-    # ---------------------------------------------------------
     # Query 3: Dead Letter Queue (DLQ) Analysis
     # Proves your data engineering team has observability 
-    # into the pipeline's health.
-    # ---------------------------------------------------------
+
     print("QUERY 3: Pipeline Observability (Analyzing the DLQ)")
     query_3 = f"""
         SELECT 

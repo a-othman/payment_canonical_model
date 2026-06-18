@@ -75,7 +75,6 @@ def generate_bill_v1(num_records=50, filename='bill_v1.csv'):
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
 
-# --- V2 FUNCTIONS (Schema Evolution) ---
 
 def generate_card_v2(num_records=50, filename='card_v2.csv'):
     data = []
@@ -128,9 +127,8 @@ def generate_bill_v2(num_records=50, filename='bill_v2.csv'):
     print(f"Generated {filename}")
 
 
-if __name__ == "__main__":
+def generate_data():
     base_path = Path(__file__).parent.parent.parent / "data/raw"
-    # Execute generation
     generate_card_v1(filename=f'{base_path}/card_v1.csv')
     generate_transfer_v1(filename=f'{base_path}/transfer_v1.csv')
     generate_bill_v1(filename= f'{base_path}/bill_v1.csv')
