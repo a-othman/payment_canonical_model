@@ -4,7 +4,7 @@ from schema.source_models import TransferSourceV1, TransferSourceV2
 
 def map_transfer_v1(raw_row: dict) -> dict:
     src = TransferSourceV1(**raw_row)
-    iso_date = datetime.strptime(src.cleared_date, "%m/%d/%Y %H:%M:%S").isoformat() + "Z"
+    iso_date = datetime.strptime(src.cleared_date, "%m/%d/%Y").isoformat() + "Z"
     return {
         "payment_id": src.transfer_id,
         "amount_cents": int(src.value * 100),

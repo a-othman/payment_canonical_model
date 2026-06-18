@@ -4,7 +4,7 @@ from schema.source_models import BillSourceV1, BillSourceV2
 
 def map_bill_v1(raw_row: dict) -> dict:
     src = BillSourceV1(**raw_row)
-    iso_date = datetime.strptime(src.payment_date, "%Y-%m-%d %H:%M:%S").isoformat() + "Z"
+    iso_date = datetime.strptime(src.payment_date, "%Y-%m-%d").isoformat() + "Z"
     return {
         "payment_id": src.payment_id,
         "amount_cents": int(src.amount_paid * 100),
