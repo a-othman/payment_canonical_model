@@ -50,6 +50,6 @@ class CanonicalPayment(BaseModel):
     @classmethod
     def amount_must_be_positive(cls, v):
         """Catches the intentional negative amount error in the Transfer v1 data."""
-        if v < 0:
+        if v <= 0:
             raise ValueError('Payment amount must be greater than zero.')
         return v

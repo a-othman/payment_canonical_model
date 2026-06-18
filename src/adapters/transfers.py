@@ -1,13 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from schema.source_models import TransferSourceV1, TransferSourceV2
 
 
 def map_transfer_v1(raw_row: dict) -> dict:
     src = TransferSourceV1(**raw_row)
-    iso_date = datetime.strptime(src.cleared_date, "%m/%d/%Y").isoformat() + "Z"
+    iso_date = datetime.strptime(src.cleared_date, "%m/%d/%Y").replace(tzinfo=timezone.utc).isoformat()
     return {
         "payment_id": src.transfer_id,
-        "amount_cents": int(src.value * 100),
+        "amount_cents": round(src.value * 100),
         "currency": "USD",
         "status": src.state,
         "payment_method": "TRANSFER",

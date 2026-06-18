@@ -39,10 +39,10 @@ def generate_transfer_v1(num_records=50, filename='transfer_v1.csv'):
         rec = {
             'transfer_id': f"TRX-{random.randint(100000, 999999)}",
             'value': round(random.uniform(100.0, 10000.0), 2),
-            'sender_routing': f"{random.randint(100000000, 999999999)}",
-            'sender_acct': f"{random.randint(10000000, 99999999)}",
-            'receiver_routing': f"{random.randint(100000000, 999999999)}",
-            'receiver_acct': f"{random.randint(10000000, 99999999)}",
+            'sender_routing': f"S_{random.randint(100000000, 999999999)}",
+            'sender_acct': f"S_{random.randint(10000000, 99999999)}",
+            'receiver_routing': f"R_{random.randint(100000000, 999999999)}",
+            'receiver_acct': f"R_{random.randint(10000000, 99999999)}",
             'type': random.choice(['ACH', 'WIRE']),
             'cleared_date': random_date(start_date, end_date).strftime('%m/%d/%Y'),
             'state': random.choice(['COMPLETED', 'PENDING', 'FAILED'])
@@ -66,7 +66,8 @@ def generate_bill_v1(num_records=50, filename='bill_v1.csv'):
             'customer_account_no': f"ACCT-{random.randint(100, 999)}",
             'amount_paid': round(random.uniform(20.0, 300.0), 2),
             'payment_date': random_date(start_date, end_date).strftime('%Y-%m-%d'),
-            'confirmation_number': f"CONF-{random.randint(100000, 999999)}"
+            'confirmation_number': f"CONF-{random.randint(100000, 999999)}",
+            'status': 'COMPLETED',
         }
         # Inject 2 intentional errors
         if i == 3: rec['payment_date'] = "06-15-2026"    # Format error (not YYYY-MM-DD)
@@ -121,7 +122,8 @@ def generate_bill_v2(num_records=50, filename='bill_v2.csv'):
             'biller_code': b[1],                                 # Dropped Biller Name (Normalization)
             'account_number': f"ACCT-{random.randint(100, 999)}",# Renamed
             'total_cents': int(amt * 100),                       # Float -> Int
-            'paid_at_ts': int(dt.timestamp())                    # Date -> UNIX Int
+            'paid_at_ts': int(dt.timestamp()),                   # Date -> UNIX Int
+            'status': random.choice(['COMPLETED', 'PENDING', 'FAILED']),
         })
     pd.DataFrame(data).to_csv(filename, index=False)
     print(f"Generated {filename}")
@@ -129,6 +131,7 @@ def generate_bill_v2(num_records=50, filename='bill_v2.csv'):
 
 def generate_data():
     base_path = Path(__file__).parent.parent.parent / "data/raw"
+    os.makedirs(base_path, exist_ok=True)
     generate_card_v1(filename=f'{base_path}/card_v1.csv')
     generate_transfer_v1(filename=f'{base_path}/transfer_v1.csv')
     generate_bill_v1(filename= f'{base_path}/bill_v1.csv')

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Literal, Optional
 
 
@@ -37,6 +37,7 @@ class TransferSourceV1(BaseTransferSource):
     state: Literal["COMPLETED", "PENDING", "FAILED"]
 
 
+
 class BillSourceV1(BaseBillSource):
     payment_id: str
     biller_name: str
@@ -45,7 +46,7 @@ class BillSourceV1(BaseBillSource):
     amount_paid: float
     payment_date: str
     confirmation_number: str
-    # status absent in v1 CSV — adapter hardcodes COMPLETED; needs CSV regen to use real status
+    status: Literal["COMPLETED"]
 
 
 # --- V2 SOURCE CONTRACTS ---
@@ -74,4 +75,4 @@ class BillSourceV2(BaseBillSource):
     account_number: str
     total_cents: int
     paid_at_ts: int
-    # status absent in v2 CSV — adapter hardcodes COMPLETED; needs CSV regen to use real status
+    status: Literal["COMPLETED", "PENDING", "FAILED"] = "COMPLETED"

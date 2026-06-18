@@ -9,8 +9,8 @@ def run_analytics():
     print("="*60)
     print("QUERY 0: Total Settled Revenue by Payment Method")
     query_0 = f"""
-        SELECT 
-            count(*) as total_transactions,
+        SELECT
+            count(*) as total_transactions
         FROM '{data_path}'
     """
     print(duckdb.sql(query_0).show())

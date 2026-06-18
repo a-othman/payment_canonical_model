@@ -1,12 +1,12 @@
 import os
+import json
 import pandas as pd
-from pydantic import ValidationError
-import json 
 from pathlib import Path
+from pydantic import ValidationError
 from schema.canonical_model import CanonicalPayment
-from adapters.transfers import *
-from adapters.cards import *
-from adapters.bill_payments import *
+from adapters.cards import map_card_v1, map_card_v2
+from adapters.transfers import map_transfer_v1, map_transfer_v2
+from adapters.bill_payments import map_bill_v1, map_bill_v2
 from utils.generators import generate_data
 
 base_path = Path(__file__).parent.parent / "data"
@@ -29,16 +29,15 @@ def run_pipeline(generate_data_flag=True):
     print("🚀 Starting Payment Ingestion Pipeline...")
     if generate_data_flag:
         generate_data()  # Generate synthetic data for testing
+    else:
+        print("Skipping data generation. Using existing CSVs in the raw directory.")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     valid_records = []
     dead_letter_queue = []
-    for filename in os.listdir(INPUT_DIR):
-        if not filename.endswith(".csv"):
-            continue
-            
-        filepath = os.path.join(INPUT_DIR, filename)
-        print(f"Processing: {filename}...")      
+    for filepath in sorted(Path(INPUT_DIR).glob("*.csv")):
+        filename = filepath.name
+        print(f"Processing: {filename}...")
         # Read CSV and handle NaNs
         df = pd.read_csv(filepath)
         df = df.where(pd.notnull(df), None)
@@ -75,16 +74,13 @@ def run_pipeline(generate_data_flag=True):
         
         parquet_path = os.path.join(OUTPUT_DIR, "canonical_payments.parquet")
         df_valid.to_parquet(parquet_path, index=False)
-
-        csv_path = os.path.join(OUTPUT_DIR, "canonical_payments.csv")
-        df_valid.to_csv(csv_path, index=False)
         print(f"\n✅ SUCCESS: Saved {len(valid_records)} canonical records to {parquet_path}")
 
     if dead_letter_queue:
         dlq_path = os.path.join(OUTPUT_DIR, "dead_letter_queue.json")
         with open(dlq_path, "w") as f:
             json.dump(dead_letter_queue, f, indent=4)
-        print(f"⚠️  CAUGHT: Saved {len(dead_letter_queue)} bad records to {dlq_path}")
+        print(f"⚠️ CAUGHT: Saved {len(dead_letter_queue)} bad records to {dlq_path}")
 
     return valid_records, dead_letter_queue
 
